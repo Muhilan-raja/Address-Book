@@ -15,20 +15,6 @@ typedef struct {
     Contact contacts[MAX_CONTACTS];
     int contactCount;
 } AddressBook;
-// Input Validators
-int val_name(AddressBook *, char *);
-int val_num(AddressBook *, char *);
-int val_mail(AddressBook *, char *);
-
-// Existence Checkers
-int is_found_name(AddressBook *, char *);
-int is_found_num(AddressBook *, char *);
-int is_found_mail(AddressBook *, char *);
-
-// Input Prompts
-void getValidatedName(AddressBook *, char *);
-void getValidatedPhone(AddressBook *, char *);
-void getValidatedEmail(AddressBook *, char *);
 
 // Core Operations
 void createContact(AddressBook *);
@@ -46,6 +32,6 @@ int searchEmail(AddressBook *);
 // Print
 void print(AddressBook *, int);
 
-// File (move to file.h if separate)
+// File 
 void saveContactsToFile(AddressBook *);
 #endif
