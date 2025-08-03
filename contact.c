@@ -2,209 +2,68 @@
 #include <stdlib.h>
 #include <string.h>
 #include "contact.h"
+#include "valid.h"
 #include "file.h"
 #include "populate.h"
 #include<ctype.h>
-int val_mail(AddressBook *,  char *);
-int val_name(AddressBook * ,char *);
-int val_num(AddressBook *,char *);
-int is_found_name(AddressBook *, char *);
-int is_found_mail(AddressBook *, char *);
-int is_found_num(AddressBook *, char *);
-
-
-
-int is_found_name( AddressBook *addressBook ,char str[])
-{
-    // check wheather the name or contact or mail is present in the stucture
-    for (int i = 0; i < addressBook->contactCount; i++) 
-    {
-        if (strcmp(addressBook->contacts[i].name, str) == 0)
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-int is_found_num( AddressBook *addressBook ,char str[])
-{
-    // check wheather the name or contact or mail is present in the stucture
-    for (int i = 0; i < addressBook->contactCount; i++) 
-    {
-        if (strcmp(addressBook->contacts[i].phone, str) == 0)
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-int is_found_mail( AddressBook *addressBook ,char str[])
-{
-    // check wheather the name or contact or mail is present in the stucture
-    for (int i = 0; i < addressBook->contactCount; i++) 
-    {
-        if (strcmp(addressBook->contacts[i].email, str) == 0)
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-void getValidatedName(AddressBook *addressBook, char *dest)
- {
-    char temp[100];
-    while (1) {
-        printf("Enter name: ");
-        scanf(" %[^\n]", temp);
-        if (val_name(addressBook, temp))
-        {
-            strcpy(dest, temp);
-            break;
-        }
-    }
-}
-
-void getValidatedPhone(AddressBook *addressBook, char *dest)
- {
-    char temp[100];
-    while (1) {
-        printf("Enter phone number: ");
-        scanf(" %[^\n]", temp);
-        if (val_num(addressBook, temp)) 
-        {
-            strcpy(dest, temp);
-            break;
-        }
-    }
-    
-}
-
-void getValidatedEmail(AddressBook *addressBook, char *dest)
-{
-    char temp[100];
-    while (1) {
-        printf("Enter email: ");
-        scanf(" %[^\n]", temp);
-        if (val_mail(addressBook, temp)) 
-        {
-            strcpy(dest, temp);
-            break;
-        }
-    }
-}
-
-int val_name( AddressBook *addressBook ,char str[])
-{
-for (int i = 0; str[i] != '\0'; i++) 
-    {
-        if (!isalpha(str[i]) && str[i] != ' ' )
-        {
-            printf("Enter Valid name , only name and spaces are allowed\n");
-            return 0;
-        }
-    }
-    if (is_found_name(addressBook, str)) {
-        printf("Name already exists in the address book\n");
-        return 0;
-    }
-    
-    return 1; 
-}
-int val_num(AddressBook *addressBook ,char str[])
-{
-    for (int i = 0; str[i] != '\0'; i++) 
-    {
-        if (!isdigit(str[i])) 
-        {
-            printf("Enter Valid number\n");
-            return 0;
-        }
-    }
-    if(strlen(str) != 10)
-    {
-        printf("Number must be 10 digit");
-        return 0;
-    }
-    if (is_found_num(addressBook, str)) {
-        printf("Num already exists in the address book\n");
-        return 0;
-    }
-    return 1; 
-}
-
-int val_mail(AddressBook *addressBook ,char str[])
-{
-   
-    if (isdigit(str[0]))
-    {
-        printf("Enter valid mail , do not start with number\n");
-        return 0;
-    }
-
-    int isat = -1;
-
-    for (int i = 0; str[i] != '\0'; i++)
-    {
-        if (str[i] == '@')
-        {
-            isat = i;
-            break;
-        }
-    }
-
-    if (isat <= 0)
-    {
-        printf("Enter valid mail, not enough character before @ \n");
-        return 0;
-    }
-
-    int dot_found = 0;
-    for (int i = isat + 1; str[i] != '\0'; i++)
-    {
-        if (str[i] == '.')
-        {
-            dot_found = i;
-            break;
-        }
-    }
-
-    for(int i = isat+1 ; i < dot_found ; i++ )
-    {
-        if(!isalpha(str[i]))
-        {
-            printf("Enter valid mail 1 \n");
-            return 0;
-        }
-    }
-
-    for (int i = dot_found + 1; str[i] != '\0'; i++)
-    {
-        if (!isalpha(str[i]))
-        {
-            printf("Enter valid mail 2 \n");
-            return 0;
-        }
-    }
-    if (is_found_mail(addressBook, str)) {
-        printf("Email already exists in the address book\n");
-        return 0;
-    }
-
-    return 1;
-}
-
+#include <unistd.h>   
 
 void listContacts(AddressBook *addressBook, int sortCriteria) 
 {
-     for (int i = 0; i < addressBook->contactCount; i++) 
-     {
-        printf("\n\nFor the student [%d]\n",i+1);
-        printf("Name is %s\n",addressBook->contacts[i].name);
-        printf("Phone is %s\n",addressBook->contacts[i].phone);
-        printf("Email is %s\n\n",addressBook->contacts[i].email);
-     }
-    
+    int n = addressBook->contactCount;
+    int index3[n];
+
+    // Initialize index array
+    for (int i = 0; i < n; i++)
+    {
+        index3[i] = i;
+    }
+
+    // Bubble sort on index array based on sortCriteria
+    for (int i = 0; i < n - 1; i++) 
+    {
+        for (int j = 0; j < n - i - 1; j++) 
+        {
+            int cmp = 0;
+            switch (sortCriteria) 
+            {
+                case 1: // Sort by name
+                    cmp = strcmp(addressBook->contacts[index3[j]].name,addressBook->contacts[index3[j + 1]].name);
+                    break;
+                case 2: // Sort by phone
+                    cmp = strcmp(addressBook->contacts[index3[j]].phone,addressBook->contacts[index3[j + 1]].phone);
+                    break;
+                case 3: // Sort by email
+                    cmp = strcmp(addressBook->contacts[index3[j]].email,addressBook->contacts[index3[j + 1]].email);
+                    break;
+                default:
+                    printf("Invalid sort criteria.\n");
+                    return;
+            }
+
+            if (cmp > 0) {
+                // Swap index3
+                int temp = index3[j];
+                index3[j] = index3[j + 1];
+                index3[j + 1] = temp;
+            }
+        }
+    }
+
+    // Print using sorted index3
+    for (int i = 0; i < n; i++) 
+    {
+        int idx = index3[i];
+        printf("\n\nFor the student [%d]\n", i + 1);
+        printf("Name is %s\n", addressBook->contacts[idx].name);
+        printf("Phone is %s\n", addressBook->contacts[idx].phone);
+        printf("Email is %s\n\n", addressBook->contacts[idx].email);
+        sleep(1);
+    }
 }
+
+    
+
 
 void initialize(AddressBook *addressBook) {
     addressBook->contactCount = 0;
@@ -215,13 +74,16 @@ void initialize(AddressBook *addressBook) {
 }
 
 void saveAndExit(AddressBook *addressBook) {
-    saveContactsToFile(addressBook); // Save contacts to file
+    // saveContactsToFile(addressBook); // Save contacts to file
     exit(EXIT_SUCCESS); // Exit the program
 }
 
 
 void createContact(AddressBook *addressBook)
 {
+    // Create a new contact
+    // Get user input for contact details
+    // Add the contact to the address book
     for (int i = addressBook->contactCount; i < addressBook->contactCount + 1; i++) 
     {
     printf("Creating contact [%d]:\n", i + 1);
@@ -237,6 +99,7 @@ void createContact(AddressBook *addressBook)
 
 void print(AddressBook *addressBook , int n )
 {
+    // Print all contacts in the address book
     int  i = n;
     printf("Contact found at index %d\n", i+1);
     printf("Name : %s\n", addressBook->contacts[i].name);
@@ -246,6 +109,9 @@ void print(AddressBook *addressBook , int n )
 }
 int searchName(AddressBook *addressBook)
 {
+    // Search for a contact by name
+    // Get user input for the name to search for
+    // Return the index of the contact if found, -1 otherwise say " Contact not found"
     int i = 0;
     int found = 0;
     char name[50];
@@ -265,6 +131,9 @@ int searchName(AddressBook *addressBook)
 
 int searchPhone(AddressBook *addressBook)
 {
+    // Search for a contact by phone number
+    // Get user input for the phone number to search for
+    // Return the index of the contact if found, -1 otherwise say " Contact not found"
     int i = 0;
     int found = 0;
     char name[50];
@@ -283,17 +152,20 @@ int searchPhone(AddressBook *addressBook)
 }
 int searchEmail(AddressBook *addressBook)
 {
+    // Search for a contact by email
+    // Get user input for the email to search for
+    // Return the index of the contact if found, -1 otherwise say " Contact not found"
     int i = 0;
 
     char name[50];
     printf("Enter Email to search for: ");
     scanf(" %[^\n]", name);
 
-    for (i = 0; i < addressBook->contactCount; i++) 
+    for (i = 0; i < addressBook->contactCount; i++)  // Loop through all contacts in the address book
     {
         if (strcmp(addressBook->contacts[i].email, name) == 0) 
         {
-            return i ;
+            return i ; 
         }
     }
     printf("Contact not found.\n");
@@ -301,6 +173,9 @@ int searchEmail(AddressBook *addressBook)
 }
 void searchContact(AddressBook *addressBook,int choice ) 
 {
+    // Search for a contact by name, phone number or email
+    // Get user input for the search criteria
+    // Display the contact details if found, otherwise say "Contact not found"
     int index2 = -1;
     switch (choice)
     {
@@ -326,6 +201,9 @@ void searchContact(AddressBook *addressBook,int choice )
 
 void editContact(AddressBook *addressBook, int choice)
 {
+    // Edit a contact by name, phone number or email
+    // Get user input for the search criteria
+    // Ask the details to edit the contact
     int index = -1;
 
     switch (choice)
@@ -347,7 +225,7 @@ void editContact(AddressBook *addressBook, int choice)
             return;
     }
 
-    if (index == -1)
+    if (index == -1) // If no contact found
     {
         printf("Contact not found. Cannot edit.\n");
         return;
@@ -359,20 +237,20 @@ void editContact(AddressBook *addressBook, int choice)
     printf("2. Phone\n");
     printf("3. Email\n");
     printf("4. All\n");
-    int choice2;
+    int choice2; // Choice to edit
     scanf("%d", &choice2);
     switch (choice2)
     {
-        case 1:
+        case 1: // edit name
         getValidatedName(addressBook,addressBook->contacts[index].name);
         break;
-        case 2:
+        case 2: // edit phone
         getValidatedPhone(addressBook,addressBook->contacts[index].phone);
         break;
-        case 3:
+        case 3: // edit email
         getValidatedEmail(addressBook,addressBook->contacts[index].email);
         break;
-        case 4:
+        case 4: // edit all
         getValidatedName(addressBook,addressBook->contacts[index].name);
         getValidatedPhone(addressBook,addressBook->contacts[index].phone);
         getValidatedEmail(addressBook,addressBook->contacts[index].email);
@@ -389,6 +267,8 @@ void editContact(AddressBook *addressBook, int choice)
 
 void deleteContact(AddressBook *addressBook)
 {
+    // Search for contact to delete
+    // If contact found, remove it from the list
     int index = searchName(addressBook);
     if (index == -1) {
         printf("Contact not found. Cannot delete.\n");
